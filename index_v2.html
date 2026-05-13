@@ -1,0 +1,551 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#061a14;--bg2:#0a2018;--bg3:#0d2a1f;--bg4:#112e23;--bg5:#163825;
+  --border:#1a4030;--border2:#1f5038;--border3:#2a6a4a;
+  --text:#c8f0e0;--text2:#7ab898;--text3:#3d7a5a;
+  --teal:#00e5a0;--teal2:#00b87d;--teal3:#007a50;
+  --teal-glow:rgba(0,229,160,0.15);
+  --blue:#4dc8ff;--blue2:#2090d0;
+  --amber:#ffb830;--amber2:#c07800;
+  --red:#ff4060;--red2:#c02040;
+  --green:#00e066;--green2:#009944;
+  --purple:#a060ff;
+  --panel-glow:0 0 0 1px rgba(0,229,160,0.08),0 4px 24px rgba(0,0,0,0.5);
+  --font-mono:'JetBrains Mono',monospace;
+  --font-ui:'Rajdhani',sans-serif;
+}
+.light{
+  --bg:#e8f5ee;--bg2:#f5fdf8;--bg3:#ddf0e8;--bg4:#cce8d8;--bg5:#bbdfc8;
+  --border:#a0ccb4;--border2:#80b898;--border3:#50906a;
+  --text:#0a2a18;--text2:#2a6040;--text3:#5a9070;
+  --teal:#007a50;--teal2:#009060;--teal3:#00b07a;
+  --teal-glow:rgba(0,122,80,0.1);
+  --blue:#1060a0;--blue2:#2080d0;
+  --amber:#905000;--amber2:#b06000;
+  --panel-glow:0 0 0 1px rgba(0,150,100,0.15),0 2px 12px rgba(0,0,0,0.08);
+}
+body{font-family:var(--font-ui);background:var(--bg);color:var(--text);transition:background .4s,color .4s;min-height:100vh;overflow-x:hidden}
+
+/* SCANLINE TEXTURE */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:0}
+.light body::before{display:none}
+
+/* ANIMATED BG GRID */
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,160,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,160,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;animation:gridShift 20s linear infinite}
+@keyframes gridShift{from{background-position:0 0}to{background-position:40px 40px}}
+.light .bg-grid{background-image:linear-gradient(rgba(0,120,80,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,120,80,0.05) 1px,transparent 1px)}
+
+.dash{position:relative;z-index:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* TOP BAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 24px;background:var(--bg2);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:36px;height:36px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#031208;letter-spacing:-0.5px;box-shadow:0 0 16px rgba(0,229,160,0.4);animation:logoGlow 3s ease-in-out infinite}
+@keyframes logoGlow{0%,100%{box-shadow:0 0 12px rgba(0,229,160,0.4)}50%{box-shadow:0 0 24px rgba(0,229,160,0.7)}}
+.logo-text{font-size:16px;font-weight:700;color:var(--text);letter-spacing:2px;font-family:var(--font-ui)}
+.logo-sub{font-size:10px;color:var(--text3);font-family:var(--font-mono);letter-spacing:1px}
+.topbar-center{font-size:18px;font-weight:700;color:var(--teal);font-family:var(--font-mono);letter-spacing:1px;text-shadow:0 0 20px rgba(0,229,160,0.5)}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.status-pill{display:flex;align-items:center;gap:7px;padding:6px 14px;border-radius:100px;background:var(--bg3);border:1px solid var(--border2);font-size:12px;font-weight:600;font-family:var(--font-mono)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);position:relative}
+.dot::after{content:'';position:absolute;inset:-3px;border-radius:50%;background:var(--green);opacity:0.3;animation:dotRing 2s ease-out infinite}
+@keyframes dotRing{0%{transform:scale(1);opacity:0.4}100%{transform:scale(2.5);opacity:0}}
+.dot.offline{background:var(--red)}
+.dot.offline::after{background:var(--red)}
+.theme-btn{display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:100px;background:var(--bg3);border:1px solid var(--border2);cursor:pointer;font-size:12px;color:var(--text2);font-family:var(--font-mono);transition:all .2s;user-select:none}
+.theme-btn:hover{border-color:var(--teal3)}
+.tog-track{width:38px;height:20px;background:var(--border3);border-radius:100px;position:relative;transition:background .3s}
+.tog-track.on{background:var(--teal2)}
+.tog-knob{width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:transform .3s;box-shadow:0 1px 4px rgba(0,0,0,0.4)}
+.tog-track.on .tog-knob{transform:translateX(18px)}
+.time-box{text-align:right;font-family:var(--font-mono)}
+.time-big{font-size:15px;font-weight:600;color:var(--text);letter-spacing:1px}
+.time-date{font-size:10px;color:var(--text3);letter-spacing:0.5px}
+.docbtn{
+  background:rgba(0,255,179,.08);
+  border:1px solid var(--border2);
+  color:var(--text);
+  padding:7px 14px;
+  border-radius:100px;
+  cursor:pointer;
+  font-family:var(--font-mono);
+  font-size:12px;
+  transition:.2s;
+}
+
+.docbtn:hover{
+  border-color:var(--teal3);
+  background:rgba(0,255,179,.14);
+}
+
+/* NET BAR */
+.netbar{display:flex;align-items:center;gap:0;background:var(--bg3);border-bottom:1px solid var(--border);padding:0 24px;overflow:hidden}
+.net-item{padding:10px 20px;display:flex;flex-direction:column;gap:3px;border-right:1px solid var(--border)}
+.net-item:first-child{padding-left:0}
+.nlabel{font-size:9px;color:var(--text3);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:1.5px}
+.nval{font-size:13px;font-weight:700;color:var(--teal);font-family:var(--font-mono)}
+.nval.muted{color:var(--text2)}
+.rssi-wrap{display:flex;align-items:center;gap:8px}
+.rssi-bars{display:flex;gap:2px;align-items:flex-end}
+.rb{width:4px;border-radius:1px 1px 0 0;background:var(--border3);transition:background .3s}
+.rb.a{background:var(--teal)}
+
+/* MAIN */
+.main{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:14px;
+  padding:18px 24px;
+  flex:1;
+  align-items:start;
+}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:16px;box-shadow:var(--panel-glow);position:relative;overflow:hidden;animation:cardIn .5s ease both}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--teal),transparent);opacity:0.4}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.card:nth-child(1){animation-delay:.05s}
+.card:nth-child(2){animation-delay:.1s}
+.card:nth-child(3){animation-delay:.15s}
+.card:nth-child(4){animation-delay:.2s}
+.card:nth-child(5){animation-delay:.25s}
+.card:nth-child(6){animation-delay:.3s}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ctitle{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--text3);font-weight:700;font-family:var(--font-mono)}
+.cbadge{font-size:10px;font-family:var(--font-mono);padding:3px 9px;border-radius:5px;background:var(--bg4);border:1px solid var(--border2);color:var(--text3)}
+
+/* DI */
+.di-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.di-item{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.di-item::after{content:'';position:absolute;inset:0;background:var(--teal-glow);opacity:0;transition:opacity .3s;border-radius:10px}
+.di-item:hover{border-color:var(--border3)}
+.di-item.on{border-color:var(--teal3);background:rgba(0,229,160,0.07)}
+.di-item.on::after{opacity:1}
+.di-lbl{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px}
+.di-state{font-size:9px;font-weight:700;font-family:var(--font-mono);padding:2px 7px;border-radius:3px;letter-spacing:0.5px;transition:all .3s}
+.di-state.hi{background:rgba(0,229,160,0.15);color:var(--teal);border:1px solid rgba(0,229,160,0.35)}
+.di-state.lo{background:rgba(61,122,90,0.12);color:var(--text3);border:1px solid var(--border2)}
+.sw{width:38px;height:22px;border-radius:100px;position:relative;cursor:pointer;flex-shrink:0;transition:background .25s;border:1px solid var(--border3)}
+.sw.off{background:var(--bg5)}
+.sw.on{background:var(--teal2);border-color:var(--teal);box-shadow:0 0 10px rgba(0,229,160,0.4)}
+.sw-k{width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,0.5)}
+.sw.on .sw-k{transform:translateX(16px)}
+
+/* AI */
+.ai-item{margin-bottom:16px}
+.ai-item:last-child{margin-bottom:0}
+.ai-row1{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.ai-name{font-family:var(--font-mono);font-size:13px;font-weight:700;color:var(--text2)}
+.ai-num{font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--teal);transition:color .3s;text-shadow:0 0 15px rgba(0,229,160,0.4)}
+.ai-u{font-size:12px;color:var(--text3);margin-left:2px}
+.ai-track{height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+.ai-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--teal3),var(--teal));transition:width .8s cubic-bezier(.4,0,.2,1);position:relative}
+.ai-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:4px;background:#fff;opacity:0.4;border-radius:2px;animation:shimmer 1.5s ease-in-out infinite}
+@keyframes shimmer{0%,100%{opacity:0.2}50%{opacity:0.6}}
+.ai-foot{display:flex;justify-content:space-between;margin-top:4px;font-size:10px;color:var(--text3);font-family:var(--font-mono)}
+
+/* DO */
+.do-item{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;transition:all .25s;position:relative;overflow:hidden}
+.do-item:last-child{margin-bottom:0}
+.do-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--border3);border-radius:3px 0 0 3px;transition:background .3s}
+.do-item.on{border-color:var(--blue2);background:rgba(77,200,255,0.05)}
+.do-item.on::before{background:var(--blue);box-shadow:0 0 8px var(--blue)}
+.do-l{display:flex;align-items:center;gap:10px}
+.do-ico{width:34px;height:34px;border-radius:8px;background:var(--bg4);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .25s}
+.do-item.on .do-ico{background:rgba(77,200,255,0.12);border-color:var(--blue2);box-shadow:0 0 10px rgba(77,200,255,0.25)}
+.do-name{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--text)}
+.do-desc{font-size:11px;color:var(--text3);margin-top:1px}
+.do-r{display:flex;align-items:center;gap:10px}
+.do-tag{font-family:var(--font-mono);font-size:10px;font-weight:700;padding:3px 9px;border-radius:4px;transition:all .3s}
+.do-tag.on{background:rgba(77,200,255,0.12);color:var(--blue);border:1px solid rgba(77,200,255,0.3)}
+.do-tag.off{background:var(--bg4);color:var(--text3);border:1px solid var(--border)}
+.do-btn{padding:6px 14px;border-radius:7px;border:1px solid var(--border3);background:var(--bg4);color:var(--text2);font-size:12px;font-family:var(--font-mono);cursor:pointer;font-weight:600;transition:all .2s;letter-spacing:0.5px}
+.do-btn:hover{background:var(--teal3);color:var(--text);border-color:var(--teal2)}
+.do-btn:active{transform:scale(0.96)}
+
+/* MODBUS */
+.mb-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);animation:fadeRow .4s ease both}
+.mb-row:last-child{border-bottom:none}
+@keyframes fadeRow{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.mb-reg{font-family:var(--font-mono);font-size:10px;color:var(--text3);margin-bottom:2px;letter-spacing:0.5px}
+.mb-name{font-size:13px;color:var(--text);font-weight:600}
+.mb-r{display:flex;align-items:center;gap:8px}
+.mb-val{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--amber);text-shadow:0 0 10px rgba(255,184,48,0.3)}
+.mb-ok{font-size:9px;font-family:var(--font-mono);font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(0,224,102,0.1);color:var(--green);border:1px solid rgba(0,224,102,0.25);letter-spacing:1px}
+
+/* CT */
+.ct-card{
+  grid-column:2/4;
+  align-self:start;
+}
+.logs-card{
+  grid-column:2/4;
+  margin-top:-280px;
+}
+.ct-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.ct-item{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px 12px;text-align:center;position:relative;overflow:hidden;transition:border-color .3s}
+.ct-item:hover{border-color:var(--amber2)}
+.ct-glow{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:60%;height:40%;background:radial-gradient(ellipse,rgba(255,184,48,0.12),transparent);pointer-events:none}
+.ct-name{font-family:var(--font-mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:2px;margin-bottom:5px}
+.ct-val{font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--amber);transition:all .4s;text-shadow:0 0 15px rgba(255,184,48,0.35)}
+.ct-unit{font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:1px}
+.ct-bar{height:4px;background:var(--border);border-radius:2px;margin-top:10px;overflow:hidden}
+.ct-fill{height:100%;background:linear-gradient(90deg,var(--amber2),var(--amber));border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+
+/* LOGS */
+.logs-card{
+  grid-column:2/4;
+}
+.log-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.log-scroll{height:190px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:var(--font-mono);font-size:11px}
+.log-scroll::-webkit-scrollbar{width:4px}
+.log-scroll::-webkit-scrollbar-track{background:transparent}
+.log-scroll::-webkit-scrollbar-thumb{background:var(--border3);border-radius:2px}
+.ll{display:flex;gap:10px;padding:3px 0;border-bottom:1px solid rgba(26,64,48,0.3);animation:logIn .3s ease both}
+.ll:last-child{border-bottom:none}
+@keyframes logIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
+.lt{color:var(--text3);min-width:58px;font-size:10px}
+.ltag{padding:1px 6px;border-radius:3px;font-size:9px;font-weight:700;letter-spacing:0.5px;flex-shrink:0;min-width:32px;text-align:center}
+.tdi{background:rgba(255,184,48,0.12);color:var(--amber)}
+.tai{background:rgba(0,229,160,0.1);color:var(--teal)}
+.tdo{background:rgba(77,200,255,0.1);color:var(--blue)}
+.tmb{background:rgba(160,96,255,0.1);color:var(--purple)}
+.tsys{background:rgba(61,122,90,0.15);color:var(--text3)}
+.tok{background:rgba(0,224,102,0.1);color:var(--green)}
+.lmsg{color:var(--text2)}
+.lmsg b{color:var(--text);font-weight:600}
+.lc{font-size:10px;font-family:var(--font-mono);color:var(--text3)}
+.clr-btn{padding:4px 12px;border-radius:6px;background:transparent;border:1px solid var(--border3);color:var(--text3);font-size:10px;font-family:var(--font-mono);cursor:pointer;transition:all .2s;letter-spacing:1px;font-weight:700}
+.clr-btn:hover{background:var(--red2);border-color:var(--red2);color:#fff}
+</style>
+
+<div class="bg-grid"></div>
+<div class="dash" id="app">
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-mark">WM</div>
+      <div>        
+      </div>
+    </div>
+    <div class="topbar-center" id="devname">EDJ20 Dashbboard</div>
+    <div class="topbar-right">
+      <div class="status-pill">
+      <button class="docbtn" onclick="openDocs()">
+  Documentation
+</button>
+        <div class="dot" id="cdot"></div>
+        <span id="ctxt" style="color:var(--text2);font-family:var(--font-mono);font-size:12px;font-weight:600">EDJ20 Connected</span>
+      </div>
+      <div class="theme-btn" onclick="toggleTheme()">
+  <span id="tlabel" style="font-size:11px">Dark Mode</span>
+
+  <div class="tog-track" id="ttrack">
+    <div class="tog-knob"></div>
+  </div>
+</div>
+      <div class="time-box">
+        <div class="time-big" id="clock"></div>
+        <div class="time-date" id="datestr"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="netbar">
+    <div class="net-item"><div class="nlabel">IP Address</div><div class="nval" id="ipaddr"></div></div>
+    <div class="net-item"><div class="nlabel">WiFi Mode</div><div class="nval" id="wifimode"></div></div>
+    <div class="net-item"><div class="nlabel">SSID</div><div class="nval muted" id="ssid"></div></div>
+    <div class="net-item">
+      <div class="nlabel">RSSI</div>
+      <div class="rssi-wrap">
+        <div class="nval" id="rssi-v">-43 dBm</div>
+        <div class="rssi-bars">
+          <div class="rb a" style="height:5px"></div>
+          <div class="rb a" style="height:8px"></div>
+          <div class="rb a" style="height:11px"></div>
+          <div class="rb a" style="height:14px"></div>
+          <div class="rb" style="height:17px"></div>
+        </div>
+      </div>
+    </div>
+    <div class="net-item"><div class="nlabel">Uptime</div><div class="nval" id="uptime">02:26:06</div></div>
+    <div class="net-item"><div class="nlabel">MCU</div><div class="nval muted" id="mcu"></div></div>
+    <div class="net-item"><div class="nlabel">Framework</div><div class="nval muted" id="framework"></div></div>
+  </div>
+
+  <div class="main">
+    <div class="card" style="animation-delay:.05s">
+      <div class="ch"><span class="ctitle">⬤ Digital Inputs</span><span class="cbadge">4 CH · 24V</span></div>
+      <div class="di-grid" id="di-grid"></div>
+    </div>
+    <div class="card" style="animation-delay:.1s">
+      <div class="ch"><span class="ctitle">⬤ Analog Inputs</span><span class="cbadge">2 CH · 3.3V ADC</span></div>
+      <div id="ai-panel"></div>
+    </div>
+    <div class="card" style="animation-delay:.15s">
+      <div class="ch"><span class="ctitle">⬤ Digital Outputs</span><span class="cbadge">2 CH · 24V</span></div>
+      <div id="do-panel"></div>
+    </div>
+    <div class="card" style="animation-delay:.2s">
+      <div class="ch"><span class="ctitle">⬤ Modbus RTU</span><span class="cbadge" style="color:var(--purple);border-color:rgba(160,96,255,0.3);background:rgba(160,96,255,0.07)">A+ / B−</span></div>
+      <div id="mb-panel"></div>
+    </div>
+    <div class="card ct-card" style="animation-delay:.25s">
+      <div class="ch"><span class="ctitle">⬤ Current Transformers</span><span class="cbadge" style="color:var(--amber);border-color:rgba(255,184,48,0.3);background:rgba(255,184,48,0.07)">3 CH · AC</span></div>
+      <div class="ct-grid" id="ct-grid"></div>
+    </div>
+    <div class="card logs-card" style="animation-delay:.3s">
+      <div class="log-toolbar">
+        <span class="ctitle">⬤ System Logs</span>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span class="lc" id="lcnt">0 entries</span>
+          <button class="clr-btn" onclick="clearLogs()">CLEAR</button>
+        </div>
+      </div>
+      <div class="log-scroll" id="lscroll"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEVICE_CONFIG = {
+  ip:'192.168.4.1',
+  ssid:'Factory_WiFi',
+  mode:'AP + STA',
+  mcu:'ESP32-S3',
+  framework:'ESP-IDF v5.1.2'
+};
+const S={
+  di:[false,false,false,false],
+  ai:[2.4,0.8],
+  doS:[false,false],
+  ct:[12.4,8.7,15.1],
+  mb:[
+  {reg:'MB01',name:'Modbus Status',val:'CONNECTED',unit:''},
+  {reg:'MB02',name:'Slave ID',val:1,unit:''},
+  {reg:'MB03',name:'Baud Rate',val:9600,unit:'bps'},
+  {reg:'MB04',name:'UART Status',val:'ACTIVE',unit:''},
+  {reg:'MB05',name:'RX Frames',val:284,unit:''},
+  {reg:'MB06',name:'TX Frames',val:251,unit:''},
+  {reg:'MB07',name:'CRC Errors',val:0,unit:''},
+  {reg:'MB08',name:'Response Time',val:24,unit:'ms'}
+],
+  logs:[],
+  upSec:9166,
+  isLight:true
+};
+
+const pad=n=>String(n).padStart(2,'0');
+const ts=()=>{const n=new Date();return pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds())};
+
+function addLog(tag,tc,msg){
+  S.logs.unshift({t:ts(),tag,tc,msg});
+  if(S.logs.length>300)S.logs.pop();
+  renderLogs();
+}
+function clearLogs(){S.logs=[];renderLogs()}
+
+function renderLogs(){
+  const el=document.getElementById('lscroll');
+  document.getElementById('lcnt').textContent=S.logs.length+' entries';
+  el.innerHTML=S.logs.slice(0,80).map(l=>
+    `<div class="ll"><span class="lt">${l.t}</span><span class="ltag ${l.tc}">${l.tag}</span><span class="lmsg">${l.msg}</span></div>`
+  ).join('');
+}
+
+function renderDI(){
+  document.getElementById('di-grid').innerHTML=S.di.map((v,i)=>`
+    <div class="di-item ${v?'on':''}" onclick="toggleDI(${i})">
+      <div><div class="di-lbl">DI${i+1}</div><div class="di-state ${v?'hi':'lo'}">${v?'HIGH (1)':'LOW (0)'}</div></div>
+      <div class="sw ${v?'on':'off'}"><div class="sw-k"></div></div>
+    </div>`).join('');
+}
+function toggleDI(i){
+  S.di[i]=!S.di[i];
+  addLog('DI','tdi',`DI${i+1} state → <b>${S.di[i]?'HIGH (1)':'LOW (0)'}</b>`);
+  renderDI();
+}
+
+function renderAI(){
+  document.getElementById('ai-panel').innerHTML=S.ai.map((v,i)=>`
+    <div class="ai-item">
+      <div class="ai-row1">
+        <span class="ai-name">AI${i+1}</span>
+        <span><span class="ai-num">${v.toFixed(2)}</span><span class="ai-u">V</span></span>
+      </div>
+      <div class="ai-track"><div class="ai-fill" style="width:${(v/3.3*100).toFixed(1)}%"></div></div>
+      <div class="ai-foot"><span>0V</span><span>${(v/3.3*100).toFixed(0)}%</span><span>3.3V</span></div>
+    </div>`).join('');
+}
+
+function renderDO(){
+  document.getElementById('do-panel').innerHTML=S.doS.map((v,i)=>`
+    <div class="do-item ${v?'on':''}">
+      <div class="do-l">
+        <div class="do-ico"><i class="ti ti-plug" aria-hidden="true" style="font-size:16px;color:${v?'var(--blue)':'var(--text3)'}"></i></div>
+        <div><div class="do-name">DO${i+1}</div><div class="do-desc">24V Digital Output</div></div>
+      </div>
+      <div class="do-r">
+        <span class="do-tag ${v?'on':'off'}">${v?'ON':'OFF'}</span>
+        <button class="do-btn" onclick="toggleDO(${i})">${v?'Turn OFF':'Turn ON'}</button>
+      </div>
+    </div>`).join('');
+}
+async function toggleDO(i){
+
+  S.doS[i]=!S.doS[i];
+
+  addLog(
+    'DO',
+    'tdo',
+    `Sending command to DO${i+1}`
+  );
+
+  renderDO();
+
+}
+
+function renderMB(){
+  document.getElementById('mb-panel').innerHTML=S.mb.map((r,idx)=>`
+    <div class="mb-row" style="animation-delay:${idx*0.07}s">
+      <div><div class="mb-reg">${r.reg}</div><div class="mb-name">${r.name}</div></div>
+      <div class="mb-r"><span class="mb-val">${r.val} ${r.unit}</span><span class="mb-ok">OK</span></div>
+    </div>`).join('');
+}
+
+function renderCT(){
+  const max=30;
+  document.getElementById('ct-grid').innerHTML=S.ct.map((v,i)=>`
+    <div class="ct-item">
+      <div class="ct-glow"></div>
+      <div class="ct-name">CT${i+1}</div>
+      <div class="ct-val">${v.toFixed(1)}</div>
+      <div class="ct-unit">AMPS AC</div>
+      <div class="ct-bar"><div class="ct-fill" style="width:${(v/max*100).toFixed(0)}%"></div></div>
+    </div>`).join('');
+}
+
+function updateClock(){
+  const n=new Date();
+  document.getElementById('clock').textContent=pad(n.getHours())+':'+pad(n.getMinutes())+':'+pad(n.getSeconds());
+  document.getElementById('datestr').textContent=n.toLocaleDateString('en-IN',{weekday:'short',year:'numeric',month:'short',day:'numeric'});
+}
+
+function updateUptime(){
+  S.upSec++;
+  const h=Math.floor(S.upSec/3600),m=Math.floor((S.upSec%3600)/60),s=S.upSec%60;
+  document.getElementById('uptime').textContent=pad(h)+':'+pad(m)+':'+pad(s);
+}
+
+async function fetchDeviceData(){
+
+  try{
+
+    document.getElementById('ctxt').textContent='EDJ20 Connected';
+	document.getElementById('cdot').classList.remove('offline');
+
+    await new Promise(r => setTimeout(r,300));
+	const rssi = -40 - Math.floor(Math.random()*15);
+	document.getElementById('rssi-v').textContent = rssi + ' dBm';
+    const data = {
+      ai:[2.4,0.8],
+      ct:[12.1,8.4,14.2],
+     mb:[
+  {reg:'MB01',name:'Modbus Status',val:'CONNECTED',unit:''},
+  {reg:'MB02',name:'Slave ID',val:1,unit:''},
+  {reg:'MB03',name:'Baud Rate',val:9600,unit:'bps'},
+  {reg:'MB04',name:'UART Status',val:'ACTIVE',unit:''},
+  {reg:'MB05',name:'RX Frames',val:284,unit:''},
+  {reg:'MB06',name:'TX Frames',val:251,unit:''},
+  {reg:'MB07',name:'CRC Errors',val:0,unit:''},
+  {reg:'MB08',name:'Response Time',val:24,unit:'ms'}
+]
+    };
+
+    S.ai = data.ai;
+    S.ct = data.ct;
+    S.mb = data.mb;
+
+    renderAI();
+    renderCT();
+    renderMB();
+  }
+
+  catch(err){
+
+    document.getElementById('ctxt').textContent='EDJ20 Disconnected';
+	document.getElementById('cdot').classList.add('offline');
+
+    addLog(
+      'SYS',
+      'tsys',
+      'Device communication failed'
+    );
+
+  }
+
+}	
+function openDocs(){
+
+  window.open(
+    'https://drive.google.com/file/d/1R1JkKiEOF4WDM043BD31yCY-CSUNge9B/view?usp=sharing',
+    '_blank'
+  );
+
+}
+
+function toggleTheme(){
+
+  S.isLight = !S.isLight;
+
+  document.getElementById('app').parentElement.className =
+    S.isLight ? 'light' : '';
+
+  document.getElementById('ttrack').className =
+    'tog-track' + (S.isLight ? '' : ' on');
+
+  document.getElementById('tlabel').textContent =
+    S.isLight ? 'Light Mode' : 'Dark Mode';
+
+}
+
+function init(){
+document.getElementById('app').parentElement.className = 'light';
+
+document.getElementById('ttrack').className =
+  'tog-track';
+
+document.getElementById('tlabel').textContent =
+  'Light Mode';
+
+  loadDeviceInfo();
+
+  renderDI();
+  renderAI();
+  renderDO();
+  renderMB();
+  renderCT();
+  updateClock();
+  addLog('SYS','tok','System boot complete — ESP32-S3 initialized');
+  addLog('SYS','tok','AP+STA mode active — IP 192.168.4.1 assigned');
+  addLog('MB','tmb','Modbus RTU slave polling started on A+/B−');
+  addLog('AI','tai','ADC channels calibrated — AI1, AI2 active');
+  addLog('DI','tdi','GPIO input monitor running — DI1–DI4');
+  addLog('SYS','tsys','CT sensors online — CT1 CT2 CT3 measuring');
+  setInterval(updateClock,1000);
+  setInterval(updateUptime,1000);
+  setInterval(fetchDeviceData,10000);
+}
+function loadDeviceInfo(){
+
+  document.getElementById('ipaddr').textContent = DEVICE_CONFIG.ip;
+  document.getElementById('wifimode').textContent = DEVICE_CONFIG.mode;
+  document.getElementById('ssid').textContent = DEVICE_CONFIG.ssid;
+  document.getElementById('mcu').textContent = DEVICE_CONFIG.mcu;
+  document.getElementById('framework').textContent = DEVICE_CONFIG.framework;
+
+}
+init();
+</script>
