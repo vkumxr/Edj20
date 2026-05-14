@@ -1,0 +1,68 @@
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font-sans);color:var(--color-text-primary);padding:1rem 0;}
+h1{font-size:22px;font-weight:500;margin-bottom:1rem;}
+.container{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;}
+.card h2{font-size:15px;font-weight:500;margin-bottom:12px;padding-bottom:8px;border-bottom:0.5px solid var(--color-border-tertiary);}
+.item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:0.5px solid var(--color-border-tertiary);}
+.item:last-child{border-bottom:none;}
+.label{font-size:14px;color:var(--color-text-secondary);}
+.value{font-size:14px;font-weight:500;}
+.toggle-wrap{width:42px;height:24px;border-radius:20px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;}
+.toggle-wrap.on{background:#22c55e;}
+.toggle-wrap.off{background:#9ca3af;}
+.toggle-wrap::before{content:'';width:18px;height:18px;background:white;border-radius:50%;position:absolute;top:3px;transition:left 0.2s;}
+.toggle-wrap.on::before{left:21px;}
+.toggle-wrap.off::before{left:3px;}
+</style>
+
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">EDJ20 I/O Dashboard</h2>
+
+<h1>EDJ20 Dashboard</h1>
+<div class="container">
+
+  <div class="card">
+    <h2>Digital inputs</h2>
+    <div class="item"><span class="label">DI1</span><div class="toggle-wrap on" onclick="toggle(this)"></div></div>
+    <div class="item"><span class="label">DI2</span><div class="toggle-wrap off" onclick="toggle(this)"></div></div>
+    <div class="item"><span class="label">DI3</span><div class="toggle-wrap off" onclick="toggle(this)"></div></div>
+    <div class="item"><span class="label">DI4</span><div class="toggle-wrap off" onclick="toggle(this)"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>Analog inputs</h2>
+    <div class="item"><span class="label">AI1</span><span class="value">2.4 V</span></div>
+    <div class="item"><span class="label">AI2</span><span class="value">0.8 V</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Digital outputs</h2>
+    <div class="item"><span class="label">DO1</span><div class="toggle-wrap on" onclick="toggle(this)"></div></div>
+    <div class="item"><span class="label">DO2</span><div class="toggle-wrap off" onclick="toggle(this)"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>CT readings</h2>
+    <div class="item"><span class="label">CT1</span><span class="value">12.4 A</span></div>
+    <div class="item"><span class="label">CT2</span><span class="value">8.7 A</span></div>
+    <div class="item"><span class="label">CT3</span><span class="value">15.1 A</span></div>
+  </div>
+
+  <div class="card">
+    <h2>Modbus</h2>
+    <div class="item"><span class="label">Status</span><span class="value" style="color:var(--color-text-success)">Connected</span></div>
+    <div class="item"><span class="label">Slave ID</span><span class="value">1</span></div>
+    <div class="item"><span class="label">Baud rate</span><span class="value">9600</span></div>
+    <div class="item"><span class="label">A+</span><span class="value">OK</span></div>
+    <div class="item"><span class="label">B−</span><span class="value">OK</span></div>
+  </div>
+
+</div>
+
+<script>
+function toggle(el){
+  el.classList.toggle('on');
+  el.classList.toggle('off');
+}
+</script>
